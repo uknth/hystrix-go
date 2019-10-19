@@ -4,7 +4,7 @@ import (
 
 	// Developed on https://github.com/DataDog/datadog-go/tree/a27810dd518c69be741a7fd5d0e39f674f615be8
 	"github.com/DataDog/datadog-go/statsd"
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/unbxd/hystrix-go/hystrix/metric"
 )
 
 // These metrics are constants because we're leveraging the Datadog tagging
@@ -37,7 +37,7 @@ type (
 		TimeInMilliseconds(name string, value float64, tags []string, rate float64) error
 	}
 
-	// DatadogCollector fulfills the metricCollector interface allowing users to
+	// DatadogCollector fulfills the metric interface allowing users to
 	// ship circuit stats to Datadog.
 	//
 	// This Collector, by default, uses github.com/DataDog/datadog-go/statsd for
@@ -84,9 +84,9 @@ type (
 //  	if err != nil {
 //  		panic(err)
 //  	}
-//  	metricCollector.Registry.Register(collector)
+//  	metric.Registry.Register(collector)
 //  }
-func NewDatadogCollector(addr, prefix string) (func(string) metricCollector.MetricCollector, error) {
+func NewDatadogCollector(addr, prefix string) (func(string) metric.Collector, error) {
 
 	c, err := statsd.NewBuffered(addr, 100)
 	if err != nil {
@@ -103,9 +103,9 @@ func NewDatadogCollector(addr, prefix string) (func(string) metricCollector.Metr
 // provide your own implementation of a statsd client, alter configuration on
 // "github.com/DataDog/datadog-go/statsd".(*Client), provide additional tags per
 // circuit-metric tuple, and add logging if you need it.
-func NewDatadogCollectorWithClient(client DatadogClient) func(string) metricCollector.MetricCollector {
+func NewDatadogCollectorWithClient(client DatadogClient) func(string) metric.Collector {
 
-	return func(name string) metricCollector.MetricCollector {
+	return func(name string) metric.Collector {
 
 		return &DatadogCollector{
 			client: client,
@@ -114,7 +114,7 @@ func NewDatadogCollectorWithClient(client DatadogClient) func(string) metricColl
 	}
 }
 
-func (dc *DatadogCollector) Update(r metricCollector.MetricResult) {
+func (dc *DatadogCollector) Update(r metric.Result) {
 	if r.Attempts > 0 {
 		dc.client.Count(DM_Attempts, int64(r.Attempts), dc.tags, 1.0)
 	}

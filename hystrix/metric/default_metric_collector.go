@@ -1,18 +1,18 @@
-package metricCollector
+package metric
 
 import (
 	"sync"
 
-	"github.com/afex/hystrix-go/hystrix/rolling"
+	"github.com/unbxd/hystrix-go/hystrix/rolling"
 )
 
-// DefaultMetricCollector holds information about the circuit state.
-// This implementation of MetricCollector is the canonical source of information about the circuit.
+// DefaultCollector holds information about the circuit state.
+// This implementation of Collector is the canonical source of information about the circuit.
 // It is used for for all internal hystrix operations
 // including circuit health checks and metrics sent to the hystrix dashboard.
 //
 // Metric Collectors do not need Mutexes as they are updated by circuits within a locked context.
-type DefaultMetricCollector struct {
+type DefaultCollector struct {
 	mutex *sync.RWMutex
 
 	numRequests *rolling.Number
@@ -32,103 +32,103 @@ type DefaultMetricCollector struct {
 	runDuration       *rolling.Timing
 }
 
-func newDefaultMetricCollector(name string) MetricCollector {
-	m := &DefaultMetricCollector{}
+func newDefaultCollector(name string) Collector {
+	m := &DefaultCollector{}
 	m.mutex = &sync.RWMutex{}
 	m.Reset()
 	return m
 }
 
 // NumRequests returns the rolling number of requests
-func (d *DefaultMetricCollector) NumRequests() *rolling.Number {
+func (d *DefaultCollector) NumRequests() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.numRequests
 }
 
 // Errors returns the rolling number of errors
-func (d *DefaultMetricCollector) Errors() *rolling.Number {
+func (d *DefaultCollector) Errors() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.errors
 }
 
 // Successes returns the rolling number of successes
-func (d *DefaultMetricCollector) Successes() *rolling.Number {
+func (d *DefaultCollector) Successes() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.successes
 }
 
 // Failures returns the rolling number of failures
-func (d *DefaultMetricCollector) Failures() *rolling.Number {
+func (d *DefaultCollector) Failures() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.failures
 }
 
 // Rejects returns the rolling number of rejects
-func (d *DefaultMetricCollector) Rejects() *rolling.Number {
+func (d *DefaultCollector) Rejects() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.rejects
 }
 
 // ShortCircuits returns the rolling number of short circuits
-func (d *DefaultMetricCollector) ShortCircuits() *rolling.Number {
+func (d *DefaultCollector) ShortCircuits() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.shortCircuits
 }
 
 // Timeouts returns the rolling number of timeouts
-func (d *DefaultMetricCollector) Timeouts() *rolling.Number {
+func (d *DefaultCollector) Timeouts() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.timeouts
 }
 
 // FallbackSuccesses returns the rolling number of fallback successes
-func (d *DefaultMetricCollector) FallbackSuccesses() *rolling.Number {
+func (d *DefaultCollector) FallbackSuccesses() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.fallbackSuccesses
 }
 
-func (d *DefaultMetricCollector) ContextCanceled() *rolling.Number {
+func (d *DefaultCollector) ContextCanceled() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.contextCanceled
 }
 
-func (d *DefaultMetricCollector) ContextDeadlineExceeded() *rolling.Number {
+func (d *DefaultCollector) ContextDeadlineExceeded() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.contextDeadlineExceeded
 }
 
 // FallbackFailures returns the rolling number of fallback failures
-func (d *DefaultMetricCollector) FallbackFailures() *rolling.Number {
+func (d *DefaultCollector) FallbackFailures() *rolling.Number {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.fallbackFailures
 }
 
 // TotalDuration returns the rolling total duration
-func (d *DefaultMetricCollector) TotalDuration() *rolling.Timing {
+func (d *DefaultCollector) TotalDuration() *rolling.Timing {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.totalDuration
 }
 
 // RunDuration returns the rolling run duration
-func (d *DefaultMetricCollector) RunDuration() *rolling.Timing {
+func (d *DefaultCollector) RunDuration() *rolling.Timing {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 	return d.runDuration
 }
 
-func (d *DefaultMetricCollector) Update(r MetricResult) {
+func (d *DefaultCollector) Update(r Result) {
 	d.mutex.RLock()
 	defer d.mutex.RUnlock()
 
@@ -149,7 +149,7 @@ func (d *DefaultMetricCollector) Update(r MetricResult) {
 }
 
 // Reset resets all metrics in this collector to 0.
-func (d *DefaultMetricCollector) Reset() {
+func (d *DefaultCollector) Reset() {
 	d.mutex.Lock()
 	defer d.mutex.Unlock()
 
