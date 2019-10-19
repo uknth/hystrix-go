@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not initialize statsd client: %v", err)
 	}
-	metricCollector.Registry.Register(c.NewStatsdCollector)
+	metric.Registry.Register(c.NewStatsdCollector)
 
 	hystrix.ConfigureCommand("test", hystrix.CommandConfig{
 		Timeout: 50,
