@@ -7,16 +7,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/rcrowley/go-metrics"
+	"github.com/unbxd/hystrix-go/hystrix/metric"
 )
 
 var makeTimerFunc = func() interface{} { return metrics.NewTimer() }
 var makeCounterFunc = func() interface{} { return metrics.NewCounter() }
 
-// GraphiteCollector fulfills the metricCollector interface allowing users to ship circuit
+// GraphiteCollector fulfills the metric interface allowing users to ship circuit
 // stats to a graphite backend. To use users must call InitializeGraphiteCollector before
-// circuits are started. Then register NewGraphiteCollector with metricCollector.Registry.Register(NewGraphiteCollector).
+// circuits are started. Then register NewGraphiteCollector with metric.Registry.Register(NewGraphiteCollector).
 //
 // This Collector uses github.com/rcrowley/go-metrics for aggregation. See that repo for more details
 // on how metrics are aggregated and expressed in graphite.
@@ -53,7 +53,7 @@ func InitializeGraphiteCollector(config *GraphiteCollectorConfig) {
 // NewGraphiteCollector creates a collector for a specific circuit. The
 // prefix given to this circuit will be {config.Prefix}.{circuit_name}.{metric}.
 // Circuits with "/" in their names will have them replaced with ".".
-func NewGraphiteCollector(name string) metricCollector.MetricCollector {
+func NewGraphiteCollector(name string) metric.Collector {
 	name = strings.Replace(name, "/", "-", -1)
 	name = strings.Replace(name, ":", "-", -1)
 	name = strings.Replace(name, ".", "-", -1)
@@ -91,7 +91,7 @@ func (g *GraphiteCollector) updateTimerMetric(prefix string, dur time.Duration) 
 	c.Update(dur)
 }
 
-func (g *GraphiteCollector) Update(r metricCollector.MetricResult) {
+func (g *GraphiteCollector) Update(r metric.Result) {
 	g.incrementCounterMetric(g.attemptsPrefix, r.Attempts)
 	g.incrementCounterMetric(g.errorsPrefix, r.Errors)
 	g.incrementCounterMetric(g.successesPrefix, r.Successes)

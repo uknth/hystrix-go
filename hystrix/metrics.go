@@ -4,8 +4,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
-	"github.com/afex/hystrix-go/hystrix/rolling"
+	"github.com/unbxd/hystrix-go/hystrix/metric"
+	"github.com/unbxd/hystrix-go/hystrix/rolling"
 )
 
 type commandExecution struct {
@@ -20,7 +20,7 @@ type metricExchange struct {
 	Updates chan *commandExecution
 	Mutex   *sync.RWMutex
 
-	metricCollectors []metricCollector.MetricCollector
+	metrics []metric.Collector
 }
 
 func newMetricExchange(name string) *metricExchange {
@@ -29,7 +29,7 @@ func newMetricExchange(name string) *metricExchange {
 
 	m.Updates = make(chan *commandExecution, 2000)
 	m.Mutex = &sync.RWMutex{}
-	m.metricCollectors = metricCollector.Registry.InitializeMetricCollectors(name)
+	m.metrics = metric.Registry.InitializeCollectors(name)
 	m.Reset()
 
 	go m.Monitor()
@@ -38,11 +38,11 @@ func newMetricExchange(name string) *metricExchange {
 }
 
 // The Default Collector function will panic if collectors are not setup to specification.
-func (m *metricExchange) DefaultCollector() *metricCollector.DefaultMetricCollector {
-	if len(m.metricCollectors) < 1 {
+func (m *metricExchange) DefaultCollector() *metric.DefaultCollector {
+	if len(m.metrics) < 1 {
 		panic("No Metric Collectors Registered.")
 	}
-	collection, ok := m.metricCollectors[0].(*metricCollector.DefaultMetricCollector)
+	collection, ok := m.metrics[0].(*metric.DefaultCollector)
 	if !ok {
 		panic("Default metric collector is not registered correctly. The default metric collector must be registered first.")
 	}
@@ -56,7 +56,7 @@ func (m *metricExchange) Monitor() {
 
 		totalDuration := time.Since(update.Start)
 		wg := &sync.WaitGroup{}
-		for _, collector := range m.metricCollectors {
+		for _, collector := range m.metrics {
 			wg.Add(1)
 			go m.IncrementMetrics(wg, collector, update, totalDuration)
 		}
@@ -66,9 +66,9 @@ func (m *metricExchange) Monitor() {
 	}
 }
 
-func (m *metricExchange) IncrementMetrics(wg *sync.WaitGroup, collector metricCollector.MetricCollector, update *commandExecution, totalDuration time.Duration) {
+func (m *metricExchange) IncrementMetrics(wg *sync.WaitGroup, collector metric.Collector, update *commandExecution, totalDuration time.Duration) {
 	// granular metrics
-	r := metricCollector.MetricResult{
+	r := metric.Result{
 		Attempts:         1,
 		TotalDuration:    totalDuration,
 		RunDuration:      update.RunDuration,
@@ -115,7 +115,7 @@ func (m *metricExchange) Reset() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
 
-	for _, collector := range m.metricCollectors {
+	for _, collector := range m.metrics {
 		collector.Reset()
 	}
 }

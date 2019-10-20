@@ -5,13 +5,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/cactus/go-statsd-client/statsd"
+	"github.com/unbxd/hystrix-go/hystrix/metric"
 )
 
-// StatsdCollector fulfills the metricCollector interface allowing users to ship circuit
+// StatsdCollector fulfills the metric interface allowing users to ship circuit
 // stats to a Statsd backend. To use users must call InitializeStatsdCollector before
-// circuits are started. Then register NewStatsdCollector with metricCollector.Registry.Register(NewStatsdCollector).
+// circuits are started. Then register NewStatsdCollector with metric.Registry.Register(NewStatsdCollector).
 //
 // This Collector uses https://github.com/cactus/go-statsd-client/ for transport.
 type StatsdCollector struct {
@@ -87,7 +87,7 @@ func InitializeStatsdCollector(config *StatsdCollectorConfig) (*StatsdCollectorC
 // NewStatsdCollector creates a collector for a specific circuit. The
 // prefix given to this circuit will be {config.Prefix}.{circuit_name}.{metric}.
 // Circuits with "/" in their names will have them replaced with ".".
-func (s *StatsdCollectorClient) NewStatsdCollector(name string) metricCollector.MetricCollector {
+func (s *StatsdCollectorClient) NewStatsdCollector(name string) metric.Collector {
 	if s.client == nil {
 		log.Fatalf("Statsd client must be initialized before circuits are created.")
 	}
@@ -146,7 +146,7 @@ func (g *StatsdCollector) updateTimingMetric(prefix string, i int64) {
 	}
 }
 
-func (g *StatsdCollector) Update(r metricCollector.MetricResult) {
+func (g *StatsdCollector) Update(r metric.Result) {
 	if r.Successes > 0 {
 		g.setGauge(g.circuitOpenPrefix, 0)
 	} else if r.ShortCircuits > 0 {

@@ -1,7 +1,5 @@
 github.com/DataDog/datadog-go v2.3.0+incompatible h1:ypCT7tHzMUrUKjdHX6GGEsGq0yi0IYMaljwN5b6hbIc=
 github.com/DataDog/datadog-go v2.3.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5 h1:rFw4nCn9iMW+Vajsk51NtYIcwSTkXr+JGrMd36kTDJw=
-github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/cactus/go-statsd-client/statsd v0.0.0-20190922113730-52b467de415c h1:rjNo46GktWW4T9RFL1Gx+rubFI+KkPTuvrRBbbovv+g=
 github.com/cactus/go-statsd-client/statsd v0.0.0-20190922113730-52b467de415c/go.mod h1:D4RDtP0MffJ3+R36OkGul0LwJLIN8nRb0Ac6jZmJCmo=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
